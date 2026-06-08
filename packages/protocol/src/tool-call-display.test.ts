@@ -121,6 +121,47 @@ describe("shared tool-call display mapping", () => {
     expect(display.displayName).toBe("Mcpproxy Call Tool Read");
   });
 
+  it("does not use input name for non-proxy unknown-detail tools", () => {
+    const display = buildToolCallDisplayModel({
+      name: "rename_file",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: { name: "new-name.ts" },
+        output: null,
+      },
+    });
+
+    expect(display.displayName).toBe("Rename File");
+  });
+
+  it("keeps explicit unknown-detail overrides ahead of proxied input names", () => {
+    const taskDisplay = buildToolCallDisplayModel({
+      name: "task",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: { name: "github:search_code" },
+        output: null,
+      },
+    });
+    const thinkingDisplay = buildToolCallDisplayModel({
+      name: "thinking",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: { name: "github:search_code" },
+        output: null,
+      },
+    });
+
+    expect(taskDisplay.displayName).toBe("Task");
+    expect(thinkingDisplay.displayName).toBe("Thinking");
+  });
+
   it("keeps the wrapper display name when proxied tool name is blank or non-string", () => {
     const blankNameDisplay = buildToolCallDisplayModel({
       name: "mcpproxy_call_tool_read",

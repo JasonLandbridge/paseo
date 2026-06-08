@@ -135,8 +135,16 @@ function buildCanonicalDetailDisplay(input: ToolCallDisplayInput): DetailDisplay
   }
 }
 
+function isMcpProxyToolName(name: string): boolean {
+  return name.trim().toLowerCase().startsWith("mcpproxy_");
+}
+
 function buildProxiedToolNameDisplay(input: ToolCallDisplayInput): DetailDisplay {
-  if (input.detail.type !== "unknown" || !isRecord(input.detail.input)) {
+  if (
+    input.detail.type !== "unknown" ||
+    !isMcpProxyToolName(input.name) ||
+    !isRecord(input.detail.input)
+  ) {
     return {};
   }
   const proxiedToolName = readTrimmedString(input.detail.input.name);
@@ -170,8 +178,8 @@ export function buildToolCallDisplayModel(input: ToolCallDisplayInput): ToolCall
   const unknownDetailOverride = buildUnknownDetailOverride(input);
   const proxiedToolNameDisplay = buildProxiedToolNameDisplay(input);
   const displayName =
-    proxiedToolNameDisplay.displayName ??
     unknownDetailOverride.displayName ??
+    proxiedToolNameDisplay.displayName ??
     canonicalDisplay.displayName ??
     humanizeToolName(input.name);
   const summary = unknownDetailOverride.summary ?? canonicalDisplay.summary;
