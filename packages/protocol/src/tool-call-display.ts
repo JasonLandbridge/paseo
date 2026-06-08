@@ -28,6 +28,14 @@ function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+function readTrimmedString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 function humanizeToolName(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) {
@@ -127,6 +135,14 @@ function buildCanonicalDetailDisplay(input: ToolCallDisplayInput): DetailDisplay
   }
 }
 
+function buildProxiedToolNameDisplay(input: ToolCallDisplayInput): DetailDisplay {
+  if (input.detail.type !== "unknown" || !isRecord(input.detail.input)) {
+    return {};
+  }
+  const proxiedToolName = readTrimmedString(input.detail.input.name);
+  return proxiedToolName ? { displayName: proxiedToolName } : {};
+}
+
 function buildUnknownDetailOverride(input: ToolCallDisplayInput): DetailDisplay {
   const lowerName = input.name.trim().toLowerCase();
   if (input.detail.type === "unknown" && lowerName === "task") {
@@ -152,7 +168,9 @@ function buildUnknownDetailOverride(input: ToolCallDisplayInput): DetailDisplay 
 export function buildToolCallDisplayModel(input: ToolCallDisplayInput): ToolCallDisplayModel {
   const canonicalDisplay = buildCanonicalDetailDisplay(input);
   const unknownDetailOverride = buildUnknownDetailOverride(input);
+  const proxiedToolNameDisplay = buildProxiedToolNameDisplay(input);
   const displayName =
+    proxiedToolNameDisplay.displayName ??
     unknownDetailOverride.displayName ??
     canonicalDisplay.displayName ??
     humanizeToolName(input.name);

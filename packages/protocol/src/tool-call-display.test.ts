@@ -86,6 +86,67 @@ describe("shared tool-call display mapping", () => {
     });
   });
 
+  it("uses the proxied tool name from unknown detail input when available", () => {
+    const display = buildToolCallDisplayModel({
+      name: "mcpproxy_call_tool_read",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: {
+          name: "github:search_code",
+          args: { query: "repo:getpaseo/paseo ToolCall" },
+        },
+        output: null,
+      },
+    });
+
+    expect(display.displayName).toBe("github:search_code");
+  });
+
+  it("keeps the wrapper display name when proxied tool name is absent", () => {
+    const display = buildToolCallDisplayModel({
+      name: "mcpproxy_call_tool_read",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: {
+          args: { query: "repo:getpaseo/paseo ToolCall" },
+        },
+        output: null,
+      },
+    });
+
+    expect(display.displayName).toBe("Mcpproxy Call Tool Read");
+  });
+
+  it("keeps the wrapper display name when proxied tool name is blank or non-string", () => {
+    const blankNameDisplay = buildToolCallDisplayModel({
+      name: "mcpproxy_call_tool_read",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: { name: "   " },
+        output: null,
+      },
+    });
+    const nonStringNameDisplay = buildToolCallDisplayModel({
+      name: "mcpproxy_call_tool_read",
+      status: "running",
+      error: null,
+      detail: {
+        type: "unknown",
+        input: { name: 42 },
+        output: null,
+      },
+    });
+
+    expect(blankNameDisplay.displayName).toBe("Mcpproxy Call Tool Read");
+    expect(nonStringNameDisplay.displayName).toBe("Mcpproxy Call Tool Read");
+  });
+
   it("provides errorText for failed calls", () => {
     const display = buildToolCallDisplayModel({
       name: "shell",
