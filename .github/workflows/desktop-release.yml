@@ -438,6 +438,7 @@ jobs:
           license=("AGPL-3.0-only")
           makedepends=("binutils" "tar")
           depends=(libxkbcommon libxcb libgcc gtk3 libxext libx11 libcups nspr mesa dbus pango libxcomposite libxrandr nodejs glib2 nss libxdamage alsa-lib systemd-libs bash hicolor-icon-theme cairo at-spi2-core expat libstdc++ libxfixes)
+          options=("!debug" "!strip")
           provides=("paseo=\${pkgver}")
           conflicts=(paseo paseo-bin paseo-appimage)
           _upstream_version="${DESKTOP_VERSION}"
@@ -470,7 +471,7 @@ jobs:
           chown -R builder:builder "$build_dir"
           runuser -u builder -- bash -lc "cd '$build_dir' && makepkg --force --clean --nodeps --noconfirm"
 
-          mapfile -t packages < <(find "$build_dir" -maxdepth 1 -type f -name "${ARCH_PACKAGE_NAME}-*.pkg.tar.zst" | sort)
+          mapfile -t packages < <(find "$build_dir" -maxdepth 1 -type f -name "${ARCH_PACKAGE_NAME}-${ARCH_PKGVER}-*.pkg.tar.zst" | sort)
           if (( ${#packages[@]} != 1 )); then
             printf '::error::Expected exactly one rebuilt Arch package, found %s\n' "${#packages[@]}"
             printf '%s\n' "${packages[@]}"
