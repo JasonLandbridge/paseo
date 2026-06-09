@@ -313,9 +313,13 @@ jobs:
           gh release upload "$RELEASE_TAG" "${files[@]}" --clobber --repo "${{ github.repository }}"
 
   publish-arch-pacman:
+    needs: [publish-linux]
     # Reuse the exact .deb asset from the published GitHub Release and repack it
     # like the AUR paseo-desktop-bin package. This does not rebuild Paseo.
-    if: ${{ github.event_name == 'release' }}
+    # Run either on release.published events or after a tag/manual desktop build has
+    # uploaded release assets. `always()` is required so release.published can run
+    # even though publish-linux is intentionally skipped for that event.
+    if: ${{ always() && (github.event_name == 'release' || (needs.publish-linux.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish != 'false')))) }}
     permissions:
       contents: read
     runs-on: ubuntu-latest
