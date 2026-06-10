@@ -518,7 +518,11 @@ test("createAgent injects daemon append system prompt at runtime only", async ()
   const record = await storage.get(snapshot.id);
 
   expect(client.createdConfigs[0]?.systemPrompt).toBe("Agent instructions.");
-  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toBe("Daemon instructions.");
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain("Paseo workspace context:");
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain(
+    `Intended workspace cwd: ${workdir}`,
+  );
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain("Daemon instructions.");
   expect(snapshot.config).not.toHaveProperty("daemonAppendSystemPrompt");
   expect(record?.config?.systemPrompt).toBe("Agent instructions.");
   expect(record?.config).not.toHaveProperty("daemonAppendSystemPrompt");
@@ -548,7 +552,11 @@ test("daemon append system prompt is injected into Pi configs", async () => {
     systemPrompt: "Agent instructions.",
   });
 
-  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toBe("Daemon instructions.");
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain("Paseo workspace context:");
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain(
+    `Intended workspace cwd: ${workdir}`,
+  );
+  expect(client.createdConfigs[0]?.daemonAppendSystemPrompt).toContain("Daemon instructions.");
 });
 
 test("setAgentMode persists the selected mode across session reload", async () => {
@@ -612,6 +620,7 @@ test("setAgentMode persists the selected mode across session reload", async () =
     }
 
     async interrupt(): Promise<void> {}
+
     async close(): Promise<void> {}
   }
 
@@ -1307,6 +1316,7 @@ test("createAgent passes explicit model strings through to the provider", async 
   const workdir = mkdtempSync(join(tmpdir(), "agent-manager-test-"));
   const storagePath = join(workdir, "agents");
   const storage = new AgentStorage(storagePath, logger);
+
   class CaptureModelClient extends TestAgentClient {
     lastConfig: AgentSessionConfig | null = null;
 
@@ -1315,6 +1325,7 @@ test("createAgent passes explicit model strings through to the provider", async 
       return new TestAgentSession(config);
     }
   }
+
   const client = new CaptureModelClient();
   const manager = new AgentManager({
     clients: {
@@ -1899,6 +1910,7 @@ test("persists live mode, model, and thinking changes without an external snapsh
 test("session config drift events update state through the stream channel", async () => {
   const workdir = mkdtempSync(join(tmpdir(), "agent-manager-session-config-events-"));
   let capturedSession: TestAgentSession | null = null;
+
   class ConfigEventClient extends TestAgentClient {
     override async createSession(config: AgentSessionConfig): Promise<AgentSession> {
       capturedSession = new TestAgentSession(config);
@@ -4823,6 +4835,7 @@ test("respondToPermission updates currentModeId after plan approval", async () =
 
   // Create a session that simulates plan approval mode change
   let sessionMode = "plan";
+
   class PlanModeTestSession implements AgentSession {
     readonly provider = "codex" as const;
     readonly capabilities = TEST_CAPABILITIES;
@@ -4890,6 +4903,7 @@ test("respondToPermission updates currentModeId after plan approval", async () =
     }
 
     async interrupt(): Promise<void> {}
+
     async close(): Promise<void> {}
   }
 
@@ -5522,12 +5536,15 @@ test("provider user_message is recorded from the live stream", async () => {
   class UnexpectedUserMsgClient implements AgentClient {
     readonly provider = "codex" as const;
     readonly capabilities = TEST_CAPABILITIES;
+
     async isAvailable(): Promise<boolean> {
       return true;
     }
+
     async createSession(config: AgentSessionConfig): Promise<AgentSession> {
       return new UnexpectedUserMessageSession(config);
     }
+
     async resumeSession(): Promise<AgentSession> {
       throw new Error("unused");
     }

@@ -27,7 +27,10 @@ import { useWorkspaceDraftSubmissionStore } from "@/stores/workspace-draft-submi
 import { encodeImages } from "@/utils/encode-images";
 import type { WorkspaceFileOpenRequest } from "@/workspace/file-open";
 import { shouldAutoFocusWorkspaceDraftComposer } from "@/screens/workspace/workspace-draft-pane-focus";
-import { validateDraftSubmission } from "@/composer/draft/workspace-tab-core";
+import {
+  resolveDraftWorkingDirectory,
+  validateDraftSubmission,
+} from "@/composer/draft/workspace-tab-core";
 import type { AgentCapabilityFlags } from "@getpaseo/protocol/agent-types";
 import type { AgentSnapshotPayload } from "@getpaseo/protocol/messages";
 import type { DaemonClient } from "@getpaseo/client/internal/daemon-client";
@@ -259,16 +262,6 @@ function buildDraftInitialValues(input: {
   };
 }
 
-function resolveDraftWorkingDirectory(input: {
-  workspaceDirectory: string | null;
-  initialSetup: WorkspaceDraftTabSetup | null;
-}): string | null {
-  if (input.initialSetup) {
-    return input.initialSetup.cwd;
-  }
-  return input.workspaceDirectory;
-}
-
 function resolveOnlineServerIds(input: { isConnected: boolean; serverId: string }): string[] {
   if (!input.isConnected) {
     return EMPTY_ONLINE_SERVER_IDS;
@@ -320,6 +313,14 @@ export function WorkspaceDraftAgentTab({
     workspaceDirectory,
     initialSetup: draftSetup,
   });
+  useEffect(() => {
+    if (draftSetup?.cwd && workspaceDirectory && draftSetup.cwd !== workspaceDirectory) {
+      console.warn("[WorkspaceDraftAgentTab] Ignoring stale draft cwd", {
+        workspaceDirectory,
+        draftSetupCwd: draftSetup.cwd,
+      });
+    }
+  }, [draftSetup?.cwd, workspaceDirectory]);
   const draftInitialValues = buildDraftInitialValues({
     workingDir: draftWorkingDirectory,
     initialSetup: draftSetup,

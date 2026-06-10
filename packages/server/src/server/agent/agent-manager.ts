@@ -91,6 +91,14 @@ function formatProviderList(providers: readonly string[]): string {
   return providers.length > 0 ? providers.join(", ") : "none";
 }
 
+function buildRuntimeWorkspaceContextPrompt(cwd: string): string {
+  return [
+    "Paseo workspace context:",
+    `- Intended workspace cwd: ${cwd}`,
+    "Use this cwd as the workspace/repository root for this agent. If your runtime cwd differs, report the mismatch before editing files or running commands.",
+  ].join("\n");
+}
+
 function buildStoredAgentConfig(record: StoredAgentRecord): AgentSessionConfig {
   const config: AgentSessionConfig = {
     provider: record.provider,
@@ -3558,15 +3566,16 @@ export class AgentManager {
 
   private applyDaemonAppendSystemPrompt(config: AgentSessionConfig): AgentSessionConfig {
     const daemonAppendSystemPrompt = this.appendSystemPrompt.trim();
+    const runtimeWorkspaceContextPrompt = buildRuntimeWorkspaceContextPrompt(config.cwd);
     const next = { ...config };
     delete next.daemonAppendSystemPrompt;
 
-    return daemonAppendSystemPrompt
-      ? {
-          ...next,
-          daemonAppendSystemPrompt,
-        }
-      : next;
+    return {
+      ...next,
+      daemonAppendSystemPrompt: daemonAppendSystemPrompt
+        ? `${runtimeWorkspaceContextPrompt}\n\n${daemonAppendSystemPrompt}`
+        : runtimeWorkspaceContextPrompt,
+    };
   }
 
   private buildLaunchContext(agentId: string, env?: Record<string, string>): AgentLaunchContext {

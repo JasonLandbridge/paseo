@@ -5,6 +5,13 @@ export interface WorkspaceDraftAutoSubmitConfig {
   model: string | null;
 }
 
+export function resolveDraftWorkingDirectory(input: {
+  workspaceDirectory: string | null;
+  initialSetup: { cwd: string } | null;
+}): string | null {
+  return input.workspaceDirectory ?? input.initialSetup?.cwd ?? null;
+}
+
 export function validateDraftSubmission(input: {
   text: string;
   allowsEmptyAutoSubmit: boolean;
