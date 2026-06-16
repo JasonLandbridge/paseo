@@ -30,7 +30,7 @@ import type { AgentStorage } from "./agent-storage.js";
 import { ensureAgentLoaded } from "./agent-loading.js";
 import { isStoredAgentProviderAvailable } from "../persistence-hooks.js";
 import {
-  killTerminalsUnderPath,
+  killTerminalsForWorkspace,
   type ArchivePaseoWorktreeDependencies,
 } from "../paseo-worktree-archive-service.js";
 import { WaitForAgentTracker } from "./wait-for-agent-tracker.js";
@@ -93,11 +93,16 @@ export interface AgentMcpServerOptions {
     WorkspaceGitService,
     "getSnapshot" | "listWorktrees" | "resolveRepoRoot"
   >;
+  findWorkspaceIdForCwd?: ArchivePaseoWorktreeDependencies["findWorkspaceIdForCwd"];
+  listActiveWorkspaces?: ArchivePaseoWorktreeDependencies["listActiveWorkspaces"];
   archiveWorkspaceRecord?: ArchivePaseoWorktreeDependencies["archiveWorkspaceRecord"];
   emitWorkspaceUpdatesForWorkspaceIds?: ArchivePaseoWorktreeDependencies["emitWorkspaceUpdatesForWorkspaceIds"];
   markWorkspaceArchiving?: ArchivePaseoWorktreeDependencies["markWorkspaceArchiving"];
   clearWorkspaceArchiving?: ArchivePaseoWorktreeDependencies["clearWorkspaceArchiving"];
   createPaseoWorktree?: CreatePaseoWorktreeWorkflowFn;
+  // Mints a fresh workspace for a cwd and returns its id, used when an agent is
+  // created with no parent and no worktree.
+  ensureWorkspaceForCreate?: (cwd: string) => Promise<string>;
   paseoHome?: string;
   worktreesRoot?: string;
   /**
@@ -570,6 +575,25 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
     return expandUserPath(trimmedCwd);
   };
 
+  async function resolveTerminalWorkspaceId(resolvedCwd: string): Promise<string> {
+    // An MCP-spawned terminal belongs to the caller agent's workspace. Only if
+    // the caller has no workspace do we mint one for the cwd.
+    const callerAgent = callerAgentId ? agentManager.getAgent(callerAgentId) : null;
+    if (callerAgent?.workspaceId) {
+      return callerAgent.workspaceId;
+    }
+
+    if (!options.ensureWorkspaceForCreate) {
+      throw new Error(
+        callerAgentId
+          ? `Caller agent ${callerAgentId} has no workspace and workspace minting is not configured`
+          : "workspaceId is required outside an agent-scoped session",
+      );
+    }
+
+    return options.ensureWorkspaceForCreate(resolvedCwd);
+  }
+
   const buildCallerAgentScheduleConfigExtras = (
     callerAgent: NonNullable<ReturnType<typeof resolveCallerAgent>>,
   ): Record<string, unknown> => {
@@ -924,6 +948,9 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
           terminalManager,
           providerSnapshotManager,
           createPaseoWorktree: options.createPaseoWorktree,
+          ...(options.ensureWorkspaceForCreate
+            ? { ensureWorkspaceForCreate: options.ensureWorkspaceForCreate }
+            : {}),
         },
         {
           kind: "mcp",
@@ -1259,7 +1286,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
 
       const structuredSnapshot = buildStoredAgentPayload(
         record,
-        providerSnapshotManager.listRegisteredProviderIds(),
+        new Set(providerSnapshotManager.listRegisteredProviderIds()),
       );
       return {
         content: [],
@@ -1306,7 +1333,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
       );
       const liveIds = new Set(liveSnapshots.map((snapshot) => snapshot.id));
       const storedRecords = await agentStorage.list();
-      const registeredProviderIds = providerSnapshotManager.listRegisteredProviderIds();
+      const registeredProviderIds = new Set(providerSnapshotManager.listRegisteredProviderIds());
       const storedAgents = storedRecords
         .filter((record) => !record.internal && !liveIds.has(record.id))
         .filter((record) => includeArchived || !record.archivedAt)
@@ -1518,8 +1545,12 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
         throw new Error("Terminal manager is not configured");
       }
 
+      const resolvedCwd = resolveScopedCwd(cwd, { required: true });
+      const workspaceId = await resolveTerminalWorkspaceId(resolvedCwd);
+
       const terminal = await terminalManager.createTerminal({
-        cwd: resolveScopedCwd(cwd, { required: true }),
+        cwd: resolvedCwd,
+        workspaceId,
         ...(name?.trim() ? { name: name.trim() } : {}),
       });
 
@@ -2217,6 +2248,9 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
           repoRoot,
           worktreePath,
           worktreeSlug,
+          // This tool's contract is to delete the worktree; on-disk removal still
+          // only happens when no sibling workspace references the directory.
+          deleteWorktreeFromDisk: true,
         },
       );
       if (!result.ok) {
@@ -2406,6 +2440,12 @@ function archiveWorktreeDependencies(
   if (!options.archiveWorkspaceRecord) {
     throw new Error("Workspace registry archiver is required to archive worktrees");
   }
+  if (!options.findWorkspaceIdForCwd) {
+    throw new Error("Workspace resolver is required to archive worktrees");
+  }
+  if (!options.listActiveWorkspaces) {
+    throw new Error("Active workspace lister is required to archive worktrees");
+  }
   if (!options.emitWorkspaceUpdatesForWorkspaceIds) {
     throw new Error("Workspace update emitter is required to archive worktrees");
   }
@@ -2422,20 +2462,19 @@ function archiveWorktreeDependencies(
     workspaceGitService: options.workspaceGitService,
     agentManager: context.agentManager,
     agentStorage: context.agentStorage,
+    findWorkspaceIdForCwd: options.findWorkspaceIdForCwd,
+    listActiveWorkspaces: options.listActiveWorkspaces,
     archiveWorkspaceRecord: options.archiveWorkspaceRecord,
     emitWorkspaceUpdatesForWorkspaceIds: options.emitWorkspaceUpdatesForWorkspaceIds,
     markWorkspaceArchiving: options.markWorkspaceArchiving,
     clearWorkspaceArchiving: options.clearWorkspaceArchiving,
-    isPathWithinRoot: isSameOrDescendantPath,
-    killTerminalsUnderPath: (rootPath: string) =>
-      killTerminalsUnderPath(
+    killTerminalsForWorkspace: (workspaceId: string) =>
+      killTerminalsForWorkspace(
         {
           terminalManager: context.terminalManager,
-          isPathWithinRoot: isSameOrDescendantPath,
-          killTrackedTerminal: () => {},
           sessionLogger: context.logger,
         },
-        rootPath,
+        workspaceId,
       ),
     sessionLogger: context.logger,
   };

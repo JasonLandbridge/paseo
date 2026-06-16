@@ -17,6 +17,7 @@ const mockState = vi.hoisted(() => {
       cursor: [] as Array<{
         command: string[];
         env?: Record<string, string>;
+        providerParams?: unknown;
       }>,
       pi: [] as ConstructorEntry[],
       genericAcp: [] as Array<{
@@ -24,6 +25,7 @@ const mockState = vi.hoisted(() => {
         env?: Record<string, string>;
         providerId?: string;
         label?: string;
+        providerParams?: unknown;
       }>,
     },
     isCommandAvailable: vi.fn(async (_command: string) => false),
@@ -42,7 +44,7 @@ const mockState = vi.hoisted(() => {
   };
 });
 
-vi.mock("../../utils/executable.js", () => ({
+vi.mock("../../executable-resolution/executable-resolution.js", () => ({
   isCommandAvailable: mockState.isCommandAvailable,
 }));
 
@@ -88,7 +90,8 @@ vi.mock("./providers/claude/agent.js", () => ({
           ? Reflect.get(this.runtimeSettings, "command")
           : undefined;
       if (command?.mode === "replace") {
-        const { isCommandAvailable } = await import("../../utils/executable.js");
+        const { isCommandAvailable } =
+          await import("../../executable-resolution/executable-resolution.js");
         return await isCommandAvailable(command.argv?.[0] ?? "");
       }
       return true;
@@ -136,7 +139,8 @@ vi.mock("./providers/codex-app-server-agent.js", () => ({
           ? Reflect.get(this.runtimeSettings, "command")
           : undefined;
       if (command?.mode === "replace") {
-        const { isCommandAvailable } = await import("../../utils/executable.js");
+        const { isCommandAvailable } =
+          await import("../../executable-resolution/executable-resolution.js");
         return await isCommandAvailable(command.argv?.[0] ?? "");
       }
       return true;
@@ -186,7 +190,8 @@ vi.mock("./providers/copilot-acp-agent.js", () => ({
           ? Reflect.get(this.runtimeSettings, "command")
           : undefined;
       if (command?.mode === "replace") {
-        const { isCommandAvailable } = await import("../../utils/executable.js");
+        const { isCommandAvailable } =
+          await import("../../executable-resolution/executable-resolution.js");
         return await isCommandAvailable(command.argv?.[0] ?? "");
       }
       return true;
@@ -239,7 +244,7 @@ vi.mock("./providers/pi/agent.js", () => ({
 
 vi.mock("./providers/generic-acp-agent.js", () => ({
   GenericACPAgentClient: class GenericACPAgentClient {
-    readonly capabilities = {
+    capabilities = {
       supportsStreaming: true,
       supportsSessionPersistence: true,
       supportsDynamicModes: true,
@@ -255,7 +260,21 @@ vi.mock("./providers/generic-acp-agent.js", () => ({
       env?: Record<string, string>;
       providerId?: string;
       label?: string;
+      providerParams?: unknown;
     }) {
+      const providerParams =
+        options.providerParams &&
+        typeof options.providerParams === "object" &&
+        !Array.isArray(options.providerParams)
+          ? (options.providerParams as Record<string, unknown>)
+          : {};
+      this.capabilities = {
+        ...this.capabilities,
+        supportsMcpServers:
+          typeof providerParams.supportsMcpServers === "boolean"
+            ? providerParams.supportsMcpServers
+            : this.capabilities.supportsMcpServers,
+      };
       this.runtimeSettings = {
         command: {
           mode: "replace",
@@ -268,6 +287,7 @@ vi.mock("./providers/generic-acp-agent.js", () => ({
         env: options.env,
         providerId: options.providerId,
         label: options.label,
+        providerParams: options.providerParams,
       });
     }
 
@@ -306,7 +326,11 @@ vi.mock("./providers/cursor-acp-agent.js", () => ({
     readonly provider = "acp";
     readonly runtimeSettings?: unknown;
 
-    constructor(options: { command: string[]; env?: Record<string, string> }) {
+    constructor(options: {
+      command: string[];
+      env?: Record<string, string>;
+      providerParams?: unknown;
+    }) {
       this.runtimeSettings = {
         command: {
           mode: "replace",
@@ -317,6 +341,7 @@ vi.mock("./providers/cursor-acp-agent.js", () => ({
       mockState.constructorArgs.cursor.push({
         command: options.command,
         env: options.env,
+        providerParams: options.providerParams,
       });
     }
 
@@ -517,6 +542,7 @@ test("new provider extending acp uses GenericACPAgentClient", () => {
       },
       providerId: "my-agent",
       label: "My Agent",
+      providerParams: undefined,
     },
     {
       command: ["my-agent", "--acp"],
@@ -525,6 +551,46 @@ test("new provider extending acp uses GenericACPAgentClient", () => {
       },
       providerId: "my-agent",
       label: "My Agent",
+      providerParams: undefined,
+    },
+  ]);
+});
+
+test("ACP provider params can disable MCP support", () => {
+  const registry = buildProviderRegistry(logger, {
+    providerOverrides: {
+      "no-mcp-acp": {
+        extends: "acp",
+        label: "No MCP ACP",
+        command: ["no-mcp-acp", "serve"],
+        params: {
+          supportsMcpServers: false,
+        },
+      },
+    },
+  });
+
+  const client = registry["no-mcp-acp"].createClient(logger);
+
+  expect(client.capabilities.supportsMcpServers).toBe(false);
+  expect(mockState.constructorArgs.genericAcp).toEqual([
+    {
+      command: ["no-mcp-acp", "serve"],
+      env: undefined,
+      providerId: "no-mcp-acp",
+      label: "No MCP ACP",
+      providerParams: {
+        supportsMcpServers: false,
+      },
+    },
+    {
+      command: ["no-mcp-acp", "serve"],
+      env: undefined,
+      providerId: "no-mcp-acp",
+      label: "No MCP ACP",
+      providerParams: {
+        supportsMcpServers: false,
+      },
     },
   ]);
 });
@@ -550,12 +616,14 @@ test("cursor provider extending acp uses CursorACPAgentClient", () => {
       env: {
         CURSOR_AGENT_LOG: "debug",
       },
+      providerParams: undefined,
     },
     {
       command: ["cursor-agent", "acp"],
       env: {
         CURSOR_AGENT_LOG: "debug",
       },
+      providerParams: undefined,
     },
   ]);
   expect(mockState.constructorArgs.genericAcp).toEqual([]);

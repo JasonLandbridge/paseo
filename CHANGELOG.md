@@ -1,5 +1,92 @@
 # Changelog
 
+## 0.1.96 - 2026-06-13
+
+_This release only fixes an Android issue — desktop users don't need to update._
+
+### Fixed
+
+- On Android, the sidebar no longer reappears and gets stuck after you open a chat
+
+## 0.1.95 - 2026-06-13
+
+### Added
+
+- **Attach any file to agents on desktop** ([#1474](https://github.com/getpaseo/paseo/pull/1474))
+
+### Improved
+
+- The git push button shows before merge actions when your branch is ahead ([#1488](https://github.com/getpaseo/paseo/pull/1488))
+- SVG attachments are uploaded to disk
+- Switching workspaces feels smoother
+
+### Fixed
+
+- Fixed cases where outdated GitHub data could be shown ([#1491](https://github.com/getpaseo/paseo/pull/1491))
+- Uploaded images in PR comments and review threads now load in the PR panel ([#1486](https://github.com/getpaseo/paseo/pull/1486))
+- Opening a project whose folder is missing shows a clear error ([#1490](https://github.com/getpaseo/paseo/pull/1490))
+- The new workspace title moves out of the way of the keyboard ([#1489](https://github.com/getpaseo/paseo/pull/1489))
+- Sidebars no longer open on their own on Android
+
+## 0.1.94 - 2026-06-12
+
+### Added
+
+- **Attach pull request comments, reviews, threads, and failed check logs to chat from the PR panel** ([#1400](https://github.com/getpaseo/paseo/pull/1400))
+- **Use Paseo in Arabic, Chinese, English, French, Russian, and Spanish** ([#1282](https://github.com/getpaseo/paseo/pull/1282), [#1478](https://github.com/getpaseo/paseo/pull/1478) by [@chyendongnhanh338](https://github.com/chyendongnhanh338), [@dwyanewang](https://github.com/dwyanewang))
+- **Create reusable terminal profiles from Host settings**
+- **Open workspaces in Antigravity** ([#1424](https://github.com/getpaseo/paseo/pull/1424) by [@krumpyzoid](https://github.com/krumpyzoid))
+
+### Improved
+
+- Claude skills appear in prompt autocomplete as you type ([#1464](https://github.com/getpaseo/paseo/pull/1464))
+- Copy file paths directly from file preview tab menus ([#1473](https://github.com/getpaseo/paseo/pull/1473))
+- PR status stays current after an agent merges a branch ([#1455](https://github.com/getpaseo/paseo/pull/1455))
+- Workspace tabs stay fast by retaining only the active workspace screens ([#1472](https://github.com/getpaseo/paseo/pull/1472))
+
+### Fixed
+
+- Composer send shortcuts no longer conflict with other keyboard shortcuts
+- Multi-question prompts advance one answer at a time ([#1462](https://github.com/getpaseo/paseo/pull/1462))
+- Imported Pi sessions keep their original model and thinking settings ([#1441](https://github.com/getpaseo/paseo/pull/1441) by [@thomasaull](https://github.com/thomasaull))
+- Reconnecting to a desktop host keeps the saved shell and workspace route
+- Worktree terminals no longer appear in parent workspaces
+- Mobile reconnects show the welcome screen correctly
+
+## 0.1.93 - 2026-06-10
+
+### Added
+
+- **Claude Fable 5 is available in the Claude model picker** ([#1443](https://github.com/getpaseo/paseo/pull/1443) by [@0-Captain](https://github.com/0-Captain))
+
+## 0.1.92 - 2026-06-10
+
+### Added
+
+- **Skills autocomplete inside prompts**
+
+### Improved
+
+- Provider catalog is inline in Host settings ([#1423](https://github.com/getpaseo/paseo/pull/1423))
+- Manual update checks skip staged rollout delays
+- CodeWhale replaces DeepSeek TUI in the provider catalog
+- ACP provider catalog entries are updated for Cline, Codebuddy Code, DimCode, Factory Droid, Gemini, Nova, and Qoder
+- OMP has its own icon and website page
+- Model selector descriptions are clearer
+- ACP provider errors show the provider's real failure message
+
+### Fixed
+
+- New Paseo worktree branches can push their first commits
+- Imported sessions no longer open blank or in the wrong workspace
+- Windows Explorer opens the selected workspace instead of Documents ([#1412](https://github.com/getpaseo/paseo/pull/1412) by [@bjspi](https://github.com/bjspi))
+- Windows editor shortcuts installed as command shims launch correctly ([#1387](https://github.com/getpaseo/paseo/pull/1387) by [@Peter7896](https://github.com/Peter7896))
+- ACP providers that cannot use MCP servers can start correctly
+- Removed hosts no longer leave host pages stuck connecting
+- File preview links open in your external browser
+- Chat stays pinned to the latest message while output streams
+- The mobile composer send button no longer shifts while typing
+
 ## 0.1.91 - 2026-06-08
 
 ### Added
