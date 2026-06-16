@@ -97,15 +97,18 @@ export const en = {
     },
     attachments: {
       addImage: "Add image",
+      addFile: "Upload file",
       addIssueOrPr: "Add issue or PR",
       dropImagesHere: "Drop images here",
+      dropFilesHere: "Drop files here",
       editQueuedMessage: "Edit queued message",
       sendQueuedMessageNow: "Send queued message now",
       openImage: "Open image attachment",
       removeImage: "Remove image attachment",
+      removeFile: "Remove file attachment",
       openGithub: "Open {{kind}} #{{number}}",
       removeGithub: "Remove {{kind}} #{{number}}",
-      browserElement: "Element · {{tag}}",
+      element: "Element",
       openBrowserElement: "Open browser element attachment",
       removeBrowserElement: "Remove browser element attachment",
       openReview: "Open review attachment",
@@ -117,6 +120,8 @@ export const en = {
       noHostSelected: "No host selected",
       initialPromptRequired: "Initial prompt is required",
       alreadyLoading: "Already loading",
+      uploadFailed: "Failed to upload file",
+      fileTooLarge: "{{fileName}} is too large (max {{size}})",
     },
     clientCommands: {
       archiveAgent: "Archive the current agent",
@@ -200,7 +205,7 @@ export const en = {
     },
   },
   sessions: {
-    title: "Sessions",
+    title: "Agent history",
     empty: "No sessions yet",
     actions: {
       loadMore: "Load more",
@@ -249,9 +254,12 @@ export const en = {
       imageUnavailable: "Image unavailable",
       imagePreviewUnavailable: "Image preview unavailable.",
       imagePreviewLoadFailed: "Unable to load image preview.",
-      reviewOne: "Review · 1 comment",
-      reviewMany: "Review · {{count}} comments",
+      review: "Review",
+      commentsOne: "1 comment",
+      commentsMany: "{{count}} comments",
       textAttachment: "Text attachment",
+      text: "Text",
+      file: "File",
     },
     speak: {
       header: "Spoke",
@@ -328,6 +336,9 @@ export const en = {
     },
     hoverCard: {
       scriptsAccessibility: "Workspace scripts",
+      copyPath: "Copy path",
+      copyBranchName: "Copy branch name",
+      copied: "Copied",
     },
     fileExplorer: {
       sort: {
@@ -346,9 +357,12 @@ export const en = {
         retry: "Retry",
         refresh: "Refresh files",
         refreshing: "Refreshing files",
+        hideHiddenFiles: "Hide hidden files",
+        showHiddenFiles: "Show hidden files",
       },
       empty: {
         noFiles: "No files",
+        noVisibleFiles: "No visible files",
       },
       states: {
         unavailable: "Workspace is unavailable",
@@ -455,6 +469,8 @@ export const en = {
         splitDown: "Split pane down",
         terminalProfilesMenu: "Terminal profiles",
         editTerminalProfiles: "Edit profiles…",
+        pinTarget: "Pin",
+        unpinTarget: "Unpin",
       },
       explorer: {
         open: "Open explorer",
@@ -583,16 +599,16 @@ export const en = {
           success: "Archived",
         },
         mergePr: {
-          squash: "Squash and merge",
-          merge: "Create a merge commit",
-          rebase: "Rebase and merge",
+          squash: "Merge",
+          merge: "Merge",
+          rebase: "Merge",
           pending: "Merging PR...",
           success: "PR merged",
         },
         autoMerge: {
-          enableSquash: "Enable auto-merge with squash",
-          enableMerge: "Enable auto-merge with merge commit",
-          enableRebase: "Enable auto-merge with rebase",
+          enableSquash: "Auto merge",
+          enableMerge: "Auto merge",
+          enableRebase: "Auto merge",
           enabled: "Auto-merge enabled",
           enabling: "Enabling auto-merge...",
           disabling: "Disabling auto-merge...",
@@ -741,12 +757,13 @@ export const en = {
     },
     actions: {
       addProject: "Add project",
+      newWorkspace: "New workspace",
       home: "Home",
       settings: "Settings",
       closeSidebar: "Close sidebar",
     },
     sections: {
-      sessions: "Sessions",
+      sessions: "History",
     },
     worktreeSetup: {
       title: "Set up worktree scripts",
@@ -822,6 +839,17 @@ export const en = {
   newWorkspace: {
     title: "New workspace",
     create: "Create",
+    backing: {
+      local: "Local",
+      worktree: "New worktree",
+      label: "Isolation",
+    },
+    fields: {
+      project: "Project",
+      base: "Base",
+      baseNotApplicable: "Not applicable",
+    },
+    titlePlaceholder: "Title (optional)",
     errors: {
       hostDisconnected: "Host is not connected",
       createWorktreeFailed: "Failed to create worktree",
@@ -1025,6 +1053,11 @@ export const en = {
     placeholder: "Type a directory path...",
     opening: "Opening project...",
     empty: "Start typing a path",
+    errors: {
+      directory_not_found: "Directory not found.",
+      open_failed: "Could not open project.",
+    },
+    openPath: "Open path",
   },
   branchSwitcher: {
     currentBranch: "Current branch: {{branchName}}. Press to switch branch.",
@@ -1285,7 +1318,7 @@ export const en = {
       creatingAgent: "Creating agent",
     },
     file: {
-      executionDirectoryMissing: "Workspace execution directory not found.",
+      directoryMissing: "Workspace directory not found.",
       loading: "Loading file...",
       noPreview: "No preview available",
       binaryPreviewUnavailable: "Binary preview unavailable",
@@ -1497,6 +1530,7 @@ export const en = {
       },
       help: {
         openProject: "Open project",
+        newWorkspace: "New workspace",
         newWorktree: "New worktree",
         archiveWorktree: "Archive worktree",
         newTab: "New tab",
@@ -1648,7 +1682,10 @@ export const en = {
         nameLabel: "Name",
         commandLabel: "Command",
         argsLabel: "Arguments",
+        nameRequired: "Name is required",
+        commandRequired: "Command is required",
         argsHint: "Space-separated arguments passed to the command",
+        saving: "Saving...",
         remove: "Remove",
         removeConfirmTitle: "Remove profile?",
         removeConfirmMessage: 'Remove "{{name}}"?',
@@ -1817,8 +1854,6 @@ export const en = {
       metadata: {
         title: "Metadata generation",
         info: "Project-specific instructions injected into the AI prompts Paseo uses to generate metadata - use them to enforce your team's conventions like branch naming, commit style, or PR format",
-        agentTitle: "Agent titles",
-        agentTitlePlaceholder: "Keep titles imperative and under 40 characters",
         branchName: "Branch names",
         branchNamePlaceholder: "Prefix branches with feat/ or fix/, mb/ for personal branches",
         commitMessage: "Commit messages",

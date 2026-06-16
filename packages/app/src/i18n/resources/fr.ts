@@ -100,15 +100,18 @@ export const fr: TranslationResources = {
     },
     attachments: {
       addImage: "Ajouter une image",
+      addFile: "Upload file",
       addIssueOrPr: "Ajouter un problème ouPR",
       dropImagesHere: "Déposez des images ici",
+      dropFilesHere: "Drop files here",
       editQueuedMessage: "Modifier le message en file d'attente",
       sendQueuedMessageNow: "Envoyer le message en file d'attente maintenant",
       openImage: "Ouvrir la pièce jointe de l'image",
       removeImage: "Supprimer l'image jointe",
+      removeFile: "Remove file attachment",
       openGithub: "Ouvrir{{kind}}#{{number}}",
       removeGithub: "Supprimer{{kind}}#{{number}}",
-      browserElement: "Élément ·{{tag}}",
+      element: "Élément",
       openBrowserElement: "Ouvrir la pièce jointe de l'élément de navigateur",
       removeBrowserElement: "Supprimer la pièce jointe d'un élément de navigateur",
       openReview: "Ouvrir la pièce jointe de l'avis",
@@ -120,6 +123,8 @@ export const fr: TranslationResources = {
       noHostSelected: "Aucun hôte sélectionné",
       initialPromptRequired: "Une invite initiale est requise",
       alreadyLoading: "Déjà en cours de chargement",
+      uploadFailed: "Failed to upload file",
+      fileTooLarge: "{{fileName}} is too large (max {{size}})",
     },
     clientCommands: {
       archiveAgent: "Archiver l'agent actuel",
@@ -204,7 +209,7 @@ export const fr: TranslationResources = {
     },
   },
   sessions: {
-    title: "Séances",
+    title: "Historique des agents",
     empty: "Aucune séance pour l'instant",
     actions: {
       loadMore: "Charger plus",
@@ -253,9 +258,12 @@ export const fr: TranslationResources = {
       imageUnavailable: "Image indisponible",
       imagePreviewUnavailable: "Aperçu de l'image indisponible.",
       imagePreviewLoadFailed: "Impossible de charger l'aperçu de l'image.",
-      reviewOne: "Avis · 1 commentaire",
-      reviewMany: "Révision · Commentaires{{count}}",
+      review: "Revue",
+      commentsOne: "1 commentaire",
+      commentsMany: "{{count}} commentaires",
       textAttachment: "Texte en pièce jointe",
+      text: "Texte",
+      file: "Fichier",
     },
     speak: {
       header: "Rayon",
@@ -332,6 +340,9 @@ export const fr: TranslationResources = {
     },
     hoverCard: {
       scriptsAccessibility: "ScriptsWorkspace",
+      copyPath: "Copier le chemin",
+      copyBranchName: "Copier le nom de la branche",
+      copied: "Copié",
     },
     fileExplorer: {
       sort: {
@@ -350,9 +361,12 @@ export const fr: TranslationResources = {
         retry: "Réessayer",
         refresh: "Actualiser les fichiers",
         refreshing: "Actualisation des fichiers",
+        hideHiddenFiles: "Masquer les fichiers cachés",
+        showHiddenFiles: "Afficher les fichiers cachés",
       },
       empty: {
         noFiles: "Aucun fichier",
+        noVisibleFiles: "Aucun fichier visible",
       },
       states: {
         unavailable: "Workspacen'est pas disponible",
@@ -460,6 +474,8 @@ export const fr: TranslationResources = {
         splitDown: "Diviser le volet vers le bas",
         terminalProfilesMenu: "Terminal profiles",
         editTerminalProfiles: "Edit profiles…",
+        pinTarget: "Épingler",
+        unpinTarget: "Détacher",
       },
       explorer: {
         open: "Ouvrir l'explorateur",
@@ -590,16 +606,16 @@ export const fr: TranslationResources = {
           success: "Archivé",
         },
         mergePr: {
-          squash: "Écraser et fusionner",
-          merge: "Créer un commit de fusion",
-          rebase: "Rebase et fusionner",
+          squash: "Fusionner",
+          merge: "Fusionner",
+          rebase: "Fusionner",
           pending: "Fusion dePR...",
           success: "PRfusionné",
         },
         autoMerge: {
-          enableSquash: "Activer la fusion automatique avec squash",
-          enableMerge: "Activer la fusion automatique avec la validation de fusion",
-          enableRebase: "Activer la fusion automatique avec rebase",
+          enableSquash: "Fusion automatique",
+          enableMerge: "Fusion automatique",
+          enableRebase: "Fusion automatique",
           enabled: "Fusion automatique activée",
           enabling: "Activation de la fusion automatique...",
           disabling: "Désactivation de la fusion automatique...",
@@ -760,12 +776,13 @@ export const fr: TranslationResources = {
     },
     actions: {
       addProject: "Ajouter un projet",
+      newWorkspace: "Nouvel espace de travail",
       home: "Maison",
       settings: "Paramètres",
       closeSidebar: "Fermer la barre latérale",
     },
     sections: {
-      sessions: "Séances",
+      sessions: "Historique",
     },
     worktreeSetup: {
       title: "Configurer les scripts d'arbre de travail",
@@ -841,6 +858,17 @@ export const fr: TranslationResources = {
   newWorkspace: {
     title: "Nouvel espace de travail",
     create: "Créer",
+    backing: {
+      local: "Local",
+      worktree: "Nouveau worktree",
+      label: "Isolation",
+    },
+    fields: {
+      project: "Projet",
+      base: "Base",
+      baseNotApplicable: "Non applicable",
+    },
+    titlePlaceholder: "Titre (facultatif)",
     errors: {
       hostDisconnected: "Hostn'est pas connecté",
       createWorktreeFailed: "Échec de la création de l'arbre de travail",
@@ -1054,6 +1082,11 @@ export const fr: TranslationResources = {
     placeholder: "Tapez un chemin de répertoire...",
     opening: "Projet d'ouverture...",
     empty: "Commencez à taper un chemin",
+    errors: {
+      directory_not_found: "Répertoire introuvable.",
+      open_failed: "Impossible d’ouvrir le projet.",
+    },
+    openPath: "Ouvrir le chemin",
   },
   branchSwitcher: {
     currentBranch: "Branche actuelle:{{branchName}}. Appuyez pour changer de branche.",
@@ -1317,7 +1350,7 @@ export const fr: TranslationResources = {
       creatingAgent: "Agent créateur",
     },
     file: {
-      executionDirectoryMissing: "Répertoire d'exécutionWorkspaceintrouvable.",
+      directoryMissing: "Répertoire Workspace introuvable.",
       loading: "Chargement du fichier...",
       noPreview: "Aucun aperçu disponible",
       binaryPreviewUnavailable: "Aperçu binaire indisponible",
@@ -1533,6 +1566,7 @@ export const fr: TranslationResources = {
       },
       help: {
         openProject: "Projet ouvert",
+        newWorkspace: "Nouvel espace de travail",
         newWorktree: "Nouvel arbre de travail",
         archiveWorktree: "Arbre de travail d'archivage",
         newTab: "Nouvel onglet",
@@ -1685,7 +1719,10 @@ export const fr: TranslationResources = {
         nameLabel: "Name",
         commandLabel: "Command",
         argsLabel: "Arguments",
+        nameRequired: "Name is required",
+        commandRequired: "Command is required",
         argsHint: "Space-separated arguments passed to the command",
+        saving: "Saving...",
         remove: "Remove",
         removeConfirmTitle: "Remove profile?",
         removeConfirmMessage: 'Remove "{{name}}"?',
@@ -1856,8 +1893,6 @@ export const fr: TranslationResources = {
       metadata: {
         title: "Génération de métadonnées",
         info: "Instructions spécifiques au projet injectées dans les invites de l'IA quePaseoutilise pour générer des métadonnées: utilisez-les pour appliquer les conventions de votre équipe telles que la dénomination des branches, le style de validation ou le formatPR.",
-        agentTitle: "TitresAgent",
-        agentTitlePlaceholder: "Gardez les titres impératifs et inférieurs à 40 caractères",
         branchName: "Noms des succursales",
         branchNamePlaceholder:
           "Préfixez les branches avec feat/ ou fix/, mb/ pour les branches personnelles",
